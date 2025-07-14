@@ -1,5 +1,5 @@
 # isso para rodar:
-# python -m streamlit run app.py
+# python -m streamlit run melhoria.py
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
@@ -18,7 +18,7 @@ if senha != SENHA_CORRETA:
     if senha != "":
         st.error("🚫 Senha incorreta.")
     st.stop()
-    
+
 # Cacheando leitura
 @st.cache_data
 def carregar_dados():
@@ -287,7 +287,7 @@ if mostrar_analise:
         # ===============================
     if variavel == "Selecione uma variável":
         st.warning("Por favor, escolha uma variável para ver o ranking.")
-        #st.stop()
+        st.stop()
     elif variavel == "Quantidade de pessoas":
         ranking = (
         df.groupby("Bairro")["qtdpessoas"]
@@ -402,13 +402,24 @@ if avaliar_bairros:
             df_filtrado = df[df["nome_bairro_setor"] == bairro_escolhido]
             #st.write(df_filtrado)
             #calculos
-            total_pessoas = df_filtrado["qtdpessoas"].sum()
-            casas_com_banheiro = df_filtrado["sem_banheiro"].apply(lambda x: 1 if x == 0 else 0).sum()
-            casas_com_cimento = df_filtrado["piso_cimento"].apply(lambda x: 0 if x == 1 else 1).sum()
-            casas_com_revestimento = df_filtrado["sem_revestimento"].apply(lambda x: 1 if x == 0 else 0).sum()
-            total_mulheres = df_filtrado["qtdmulheres"].sum()
-            total_favelas = df_filtrado["nome_favela"].dropna().nunique()
-
+            #total_pessoas = df_filtrado["qtdpessoas"].sum()
+            #casas_com_banheiro = df_filtrado["sem_banheiro"].apply(lambda x: 1 if x == 0 else 0).sum()
+            #casas_com_cimento = df_filtrado["piso_cimento"].apply(lambda x: 0 if x == 1 else 1).sum()
+            #casas_com_revestimento = df_filtrado["sem_revestimento"].apply(lambda x: 1 if x == 0 else 0).sum()
+            #total_mulheres = df_filtrado["qtdmulheres"].sum()
+            #total_favelas = df_filtrado["nome_favela"].dropna().nunique()
+            mapa_bairro = df_filtrado.dropna(subset=["latitude", "longitude"]).copy()
+            mapa_bairro["latitude"] = pd.to_numeric(mapa_bairro["latitude"], errors="coerce")
+            mapa_bairro["longitude"] = pd.to_numeric(mapa_bairro["longitude"], errors="coerce")
+            total_pessoas_bairro = df_filtrado["qtdpessoas"].sum()
+            casas_com_banheiro_bairro = df_filtrado["sem_banheiro"].apply(lambda x: 1 if x == 0 else 0).sum()
+            casas_com_cimento_bairro = df_filtrado["piso_cimento"].apply(lambda x: 0 if x == 1 else 1).sum()
+            casas_com_revestimento_bairro = df_filtrado["sem_revestimento"].apply(lambda x: 1 if x == 0 else 0).sum()
+            total_mulheres_bairro = df_filtrado["qtdmulheres"].sum()
+            total_favelas_bairro = df_filtrado["nome_favela"].dropna().nunique()
+            total_idosos_bairro = df_filtrado["qtd_idoso"].sum()
+            total_criancas_bairro = df_filtrado["qtd_primeira_infancia"].sum()
+            total_pcd_bairro = df_filtrado["qtd_pcd"].sum()
                 # Exibição
             st.subheader("📊 Indicadores do bairro")
             idh_medio = df_filtrado["IDH"].mean()
@@ -448,40 +459,37 @@ if avaliar_bairros:
                 #col2.metric("🚻 Casas com banheiro", f"{int(casas_com_banheiro):,}")
                 #col3.metric("👩 Mulheres", f"{int(total_mulheres):,}")
             total_registros = len(df_filtrado)
-            st.markdown(
-        f"""
-        <div style="display: flex; gap: 20px; margin-top: 20px;">
-            <div style="flex: 1; padding: 20px; background-color: #e0f7fa; border-radius: 10px; text-align: center;">
-                <h4>👥 Total de pessoas</h4>
-                <h2>{format_brasil(total_pessoas)}</h2>
-            </div>
-            <div style="flex: 1; padding: 20px; background-color: #f1f8e9; border-radius: 10px; text-align: center;">
-                <h4>🚻 Casas com banheiro</h4>
-                <h2>{format_brasil(casas_com_banheiro)}</h2>
-            </div>
-            <div style="flex: 1; padding: 20px; background-color: #d1d1e0; border-radius: 10px; text-align: center;">
-                <h4>🧱 Casas com cimento</h4>
-                <h2>{format_brasil(casas_com_cimento)}</h2>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 20px; margin-top: 20px;">
-            <div style="flex: 1; padding: 20px; background-color: #fce4ec; border-radius: 10px; text-align: center;">
-                <h4>👩 Mulheres</h4>
-                <h2>{format_brasil(total_mulheres)}</h2>
-            </div>
-            <div style="flex: 1; padding: 20px; background-color: #ffe0b2; border-radius: 10px; text-align: center;">
-                <h4>🌆 Favelas</h4>
-                <h2>{format_brasil(total_favelas)}</h2>
-            </div>
-            <div style="flex: 1; padding: 20px; background-color: #fff3e0; border-radius: 10px; text-align: center;">
-                <h4>🏺 Casas com revestimento</h4>
-                <h2>{format_brasil(casas_com_revestimento)}</h2>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+            st.markdown(f"""
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #e0f7fa; border-radius: 10px; text-align: center;">
+                        <h4>👥 Total de pessoas</h4><h2>{format_brasil(total_pessoas_bairro)}</h2>
+                    </div>
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #f1f8e9; border-radius: 10px; text-align: center;">
+                        <h4>🚻 Casas com banheiro</h4><h2>{format_brasil(casas_com_banheiro_bairro)}</h2>
+                    </div>
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #d1d1e0; border-radius: 10px; text-align: center;">
+                        <h4>🧱 Casas com cimento</h4><h2>{format_brasil(casas_com_cimento_bairro)}</h2>
+                    </div>
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #fce4ec; border-radius: 10px; text-align: center;">
+                        <h4>👩 Mulheres</h4><h2>{format_brasil(total_mulheres_bairro)}</h2>
+                    </div>
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #ffe0b2; border-radius: 10px; text-align: center;">
+                        <h4>🌆 Favelas</h4><h2>{format_brasil(total_favelas_bairro)}</h2>
+                    </div>
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #fff3e0; border-radius: 10px; text-align: center;">
+                        <h4>🏺 Casas com revestimento</h4><h2>{format_brasil(casas_com_revestimento_bairro)}</h2>
+                    </div>
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #ede7f6; border-radius: 10px; text-align: center;">
+                        <h4>👵 Idosos</h4><h2>{format_brasil(total_idosos_bairro)}</h2>
+                    </div>
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #c8e6c9; border-radius: 10px; text-align: center;">
+                        <h4>🧒 Crianças</h4><h2>{format_brasil(total_criancas_bairro)}</h2>
+                    </div>
+                    <div style="flex: 1; min-width:200px; padding: 20px; background-color: #ffe082; border-radius: 10px; text-align: center;">
+                        <h4>♿ PCD</h4><h2>{format_brasil(total_pcd_bairro)}</h2>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
         st.warning(f"🗂️ Total de registros do bairro {bairro_escolhido}: {format_brasil(total_registros)}")
         # Mapa só do bairro selecionado
         st.subheader(f"🗺️ Mapa dos locais no bairro {bairro_escolhido}")
