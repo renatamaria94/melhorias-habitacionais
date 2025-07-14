@@ -287,7 +287,7 @@ if mostrar_analise:
         # ===============================
     if variavel == "Selecione uma variável":
         st.warning("Por favor, escolha uma variável para ver o ranking.")
-        st.stop()
+        #st.stop()
     elif variavel == "Quantidade de pessoas":
         ranking = (
         df.groupby("Bairro")["qtdpessoas"]
